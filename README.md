@@ -22,4 +22,4 @@ An interactive, web-based digital diary designed to look and feel exactly like t
 * **Vanilla JavaScript** for logic, page-flipping, and `localStorage` data management.
 
 ## 🎮 Live Demo
-[Insert your GitHub Pages link here once it is live!]
+[https://raushansharmaweb.github.io/minecraft-book-and-quill/]
