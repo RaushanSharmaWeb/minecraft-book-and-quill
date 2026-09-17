@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft Book & Quill Diary</title>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'VT323', monospace; 
+            -webkit-font-smoothing: none; 
+        }
+
+        body {
+            /* Dirt Background */
+            background-color: #593D29;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect width='16' height='16' fill='%23866043'/%3E%3Crect width='2' height='2' x='2' y='2' fill='%235f4028'/%3E%3Crect width='2' height='2' x='8' y='4' fill='%235f4028'/%3E%3Crect width='2' height='2' x='4' y='10' fill='%235f4028'/%3E%3Crect width='2' height='2' x='12' y='12' fill='%235f4028'/%3E%3Crect width='2' height='2' x='0' y='8' fill='%239f7653'/%3E%3Crect width='2' height='2' x='10' y='0' fill='%239f7653'/%3E%3Crect width='2' height='2' x='6' y='14' fill='%239f7653'/%3E%3Crect width='2' height='2' x='14' y='6' fill='%239f7653'/%3E%3C/svg%3E");
+            background-size: 64px 64px;
+            image-rendering: pixelated; 
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: transparent;
+            z-index: 1;
+            transition: background 0.3s ease;
+        }
+
+        /* ==========================================
+           FLOATING ITEM COVER SCREEN
+           ========================================== */
+        .item-container {
+            position: absolute;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .mc-item {
+            width: 150px;
+            image-rendering: pixelated; 
+            animation: float 2s ease-in-out infinite;
+            filter: drop-shadow(0px 15px 10px rgba(0,0,0,0.6));
+            transition: transform 0.2s;
+        }
+
+        .mc-item:hover { transform: scale(1.1); }
+
+        .item-text {
+            color: #ffff55; 
+            font-size: 2.5rem;
+            margin-top: 20px;
+            text-shadow: 3px 3px 0px #333;
+            animation: float 2s ease-in-out infinite;
+            animation-delay: 0.1s;
+            text-align: center;
+            padding: 0 10px;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* ==========================================
+           BOOK GUI (2 Pages)
+           ========================================== */
+        .book-gui {
+            position: relative;
+            z-index: 10;
+            width: 850px;
+            max-width: 95vw; /* Mobile max-width */
+            height: 520px;
+            max-height: 90vh; /* Mobile max-height */
+            background-color: #F6E3B5; 
+            border: 8px solid #5C3A21; 
+            border-radius: 4px;
+            box-shadow: inset 4px 4px 0px #FFF3D4, inset -4px -4px 0px #D1B886, 0 20px 50px rgba(0,0,0,0.8);
+            display: none; 
+            flex-direction: row; /* Desktop side-by-side */
+        }
+
+        /* Book Spine/Binding in the middle (Desktop only) */
+        .spine {
+            position: absolute;
+            top: 0; bottom: 0; left: 50%;
+            width: 20px;
+            transform: translateX(-50%);
+            background: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.1) 20%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.1) 80%, transparent 100%);
+            pointer-events: none;
+            z-index: 15;
+        }
+
+        .close-btn {
+            position: absolute;
+            right: 15px;
+            top: 5px;
+            font-size: 2rem;
+            color: #555;
+            cursor: pointer;
+            user-select: none;
+            z-index: 20;
+        }
+        .close-btn:hover { color: #000; font-weight: bold; }
+
+        .page {
+            width: 50%;
+            height: 100%;
+            padding: 30px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .page-number { font-size: 1.6rem; color: #555; }
+
+        input[type="text"], textarea {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #000;
+            font-size: 1.5rem;
+            width: 100%;
+            line-height: 1.2;
+        }
+
+        input[type="text"] {
+            font-weight: bold;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            border-bottom: 2px dotted #C7B382;
+        }
+
+        textarea { flex-grow: 1; resize: none; }
+        input::placeholder, textarea::placeholder { color: #A89B7D; }
+
+        textarea::-webkit-scrollbar, .read-content::-webkit-scrollbar { width: 6px; }
+        textarea::-webkit-scrollbar-track, .read-content::-webkit-scrollbar-track { background: transparent; }
+        textarea::-webkit-scrollbar-thumb, .read-content::-webkit-scrollbar-thumb { background: #C7B382; }
+
+        .mc-btn {
+            background-color: #c6c6c6;
+            color: #111;
+            font-size: 1.4rem;
+            padding: 5px 10px;
+            cursor: pointer;
+            border: 2px solid #000;
+            text-align: center;
+            user-select: none;
+            position: relative;
+            margin-top: 15px;
+            box-shadow: inset 2px 2px 0px #fff, inset -2px -2px 0px #555;
+        }
+        .mc-btn:hover { background-color: #a0a0a0; color: #ffff55; text-shadow: 2px 2px 0px #3f3f00; }
+        .mc-btn:active { box-shadow: inset 2px 2px 0px #555, inset -2px -2px 0px #fff; }
+
+        .read-area { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden;}
+        .read-title { font-size: 1.8rem; font-weight: bold; margin-bottom: 5px; }
+        .read-date { font-size: 1.2rem; color: #666; margin-bottom: 15px; border-bottom: 2px dotted #C7B382; padding-bottom: 5px;}
+        .read-content { font-size: 1.5rem; white-space: pre-wrap; flex-grow: 1; overflow-y: auto; line-height: 1.2; padding-right: 5px;}
+        .empty-state { text-align: center; color: #888; font-size: 1.5rem; margin-top: 50px; }
+
+        .nav-arrows { display: flex; justify-content: space-between; margin-top: auto; padding-top: 10px; }
+        .arrow { font-size: 2rem; color: #888; cursor: pointer; user-select: none; }
+        .arrow:hover { color: #000; }
+        .arrow.disabled { color: #d1b886; cursor: default; }
+
+        @keyframes popOpen {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* ==========================================
+           MOBILE RESPONSIVE (PHONES)
+           ========================================== */
+        @media (max-width: 768px) {
+            .book-gui {
+                flex-direction: column; /* Stack pages up and down */
+                overflow-y: auto;       /* Enable scrolling for the whole book */
+                overflow-x: hidden;
+            }
+            .spine { display: none; /* Hide middle crease on mobile */ }
+            
+            .page {
+                width: 100%;
+                height: auto;
+                min-height: 400px;
+            }
+
+            /* Add a horizontal line to separate the two pages */
+            .page:first-child {
+                border-bottom: 4px dashed #C7B382;
+            }
+
+            .item-text { font-size: 1.8rem; }
+            
+            .close-btn {
+                background: #F6E3B5;
+                padding: 0 10px;
+                border-radius: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="overlay" id="overlay" onclick="closeBook()"></div>
+
+    <!-- START SCREEN: Floating Item Cover -->
+    <div class="item-container" id="item-container" onclick="openBook()">
+        <img src="https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/e9/Book_and_Quill_JE2_BE2.png/revision/latest?cb=20240724193510" alt="Book Cover" class="mc-item">
+        <div class="item-text">Click to Open Diary</div>
+    </div>
+
+    <!-- MAIN BOOK GUI -->
+    <div class="book-gui" id="book">
+        
+        <div class="spine"></div>
+        <div class="close-btn" onclick="closeBook()">x</div>
+
+        <!-- LEFT PAGE (Top on Mobile) -->
+        <div class="page">
+            <div class="page-header">
+                <span class="page-number">Write Entry</span>
+            </div>
+            <input type="text" id="entry-title" placeholder="Title of your story...">
+            <textarea id="entry-content" placeholder="Start writing here..."></textarea>
+            <div class="mc-btn" onclick="saveData()">Sign & Save</div>
+        </div>
+
+        <!-- RIGHT PAGE (Bottom on Mobile) -->
+        <div class="page">
+            <div class="page-header">
+                <span class="page-number" id="page-indicator">Page 1 of 1</span>
+            </div>
+            
+            <div class="read-area" id="read-area"></div>
+
+            <div class="nav-arrows">
+                <div class="arrow" id="btn-prev" onclick="changePage(-1)">◀</div>
+                <div class="mc-btn" style="margin-top:0; padding: 2px 10px; font-size:1.2rem;" onclick="deleteEntry()">Delete</div>
+                <div class="arrow" id="btn-next" onclick="changePage(1)">▶</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 0;
+
+        function openBook() {
+            document.getElementById('item-container').style.display = 'none';
+            const book = document.getElementById('book');
+            book.style.display = 'flex';
+            book.style.animation = 'popOpen 0.3s ease-out forwards';
+            document.getElementById('overlay').style.background = 'rgba(0, 0, 0, 0.4)';
+            loadPage();
+        }
+
+        function closeBook() {
+            const book = document.getElementById('book');
+            if(book.style.display === 'flex') {
+                book.style.display = 'none';
+                document.getElementById('item-container').style.display = 'flex';
+                document.getElementById('overlay').style.background = 'transparent';
+            }
+        }
+
+        function saveData() {
+            const titleBox = document.getElementById('entry-title');
+            const contentBox = document.getElementById('entry-content');
+            
+            const title = titleBox.value.trim();
+            const content = contentBox.value.trim();
+
+            if (title === "" || content === "") return; 
+
+            const dateObj = new Date();
+            const dateString = dateObj.toLocaleDateString() + " " + dateObj.toLocaleTimeString();
+
+            let allMemories = JSON.parse(localStorage.getItem('mcDiaryPro')) || [];
+            allMemories.unshift({ title: title, content: content, date: dateString });
+            localStorage.setItem('mcDiaryPro', JSON.stringify(allMemories));
+
+            titleBox.value = '';
+            contentBox.value = '';
+
+            currentPage = 0; 
+            loadPage();
+
+            // Mobile logic: After saving, scroll down smoothly to the saved entry
+            if(window.innerWidth <= 768) {
+                document.getElementById('book').scrollTo({
+                    top: document.getElementById('book').scrollHeight,
+                    behavior: 'smooth'
+                });
+            }
+        }
+
+        function loadPage() {
+            let allMemories = JSON.parse(localStorage.getItem('mcDiaryPro')) || [];
+            const readArea = document.getElementById('read-area');
+            const pageIndicator = document.getElementById('page-indicator');
+            const btnPrev = document.getElementById('btn-prev');
+            const btnNext = document.getElementById('btn-next');
+
+            if (allMemories.length === 0) {
+                readArea.innerHTML = `<div class="empty-state">No stories written yet.<br>Write on the other page to start!</div>`;
+                pageIndicator.innerText = `Page 1 of 1`;
+                btnPrev.classList.add('disabled');
+                btnNext.classList.add('disabled');
+                return;
+            }
+
+            if (currentPage < 0) currentPage = 0;
+            if (currentPage >= allMemories.length) currentPage = allMemories.length - 1;
+
+            let memory = allMemories[currentPage];
+            
+            readArea.innerHTML = `
+                <div class="read-title">${memory.title}</div>
+                <div class="read-date">${memory.date}</div>
+                <div class="read-content">${memory.content}</div>
+            `;
+
+            pageIndicator.innerText = `Page ${currentPage + 1} of ${allMemories.length}`;
+
+            if (currentPage === 0) btnPrev.classList.add('disabled');
+            else btnPrev.classList.remove('disabled');
+
+            if (currentPage === allMemories.length - 1) btnNext.classList.add('disabled');
+            else btnNext.classList.remove('disabled');
+        }
+
+        function changePage(direction) {
+            let allMemories = JSON.parse(localStorage.getItem('mcDiaryPro')) || [];
+            if (direction === -1 && currentPage > 0) {
+                currentPage--;
+                loadPage();
+            } else if (direction === 1 && currentPage < allMemories.length - 1) {
+                currentPage++;
+                loadPage();
+            }
+        }
+
+        function deleteEntry() {
+            let allMemories = JSON.parse(localStorage.getItem('mcDiaryPro')) || [];
+            if (allMemories.length === 0) return;
+            
+            if(confirm("Burn this page? (Delete memory)")) {
+                allMemories.splice(currentPage, 1);
+                localStorage.setItem('mcDiaryPro', JSON.stringify(allMemories));
+                if (currentPage >= allMemories.length && currentPage > 0) {
+                    currentPage--;
+                }
+                loadPage();
+            }
+        }
+    </script>
+</body>
+</html>
